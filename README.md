@@ -2,6 +2,8 @@
 
 Единое хранилище **HTTP API-контрактов** платформы (OpenAPI 3.1).
 
+**GitHub:** https://github.com/couragegang/api-contracts
+
 **ADR:** [`cursor-context/docs/adr-001-api-contracts-openapi.md`](../../cursor-context/docs/adr-001-api-contracts-openapi.md)  
 **Модель данных (отдельно):** [`cursor-context/docs/erd-and-bounded-contexts.md`](../../cursor-context/docs/erd-and-bounded-contexts.md)  
 **UI → API:** [`cursor-context/docs/ui-api-scenarios.md`](../../cursor-context/docs/ui-api-scenarios.md)
