@@ -1,13 +1,13 @@
 openapi: 3.1.0
 info:
   title: Audit Service API
-  version: 0.1.0-draft
+  version: 0.1.0
   description: |
-    Platform audit — tool-calls, admin events.
+    Platform audit — tool-calls, installation lifecycle.
     x-erd: cursor-context/docs/erd-and-bounded-contexts.md#9-bc-platform-audit-audit-service
 servers:
   - url: http://localhost:8086/v1/audit
-    description: локально (порт TBD)
+    description: локально / platform compose
 tags:
   - name: tool-events
   - name: internal
@@ -37,13 +37,68 @@ paths:
     post:
       tags: [internal]
       operationId: auditToolEventsIngest
-      summary: Append-only ingest (ai-runtime / mcp-gateway)
+      summary: Append-only ingest (mcp-gateway / ai-runtime)
       security: []
+      parameters:
+        - $ref: '#/components/parameters/AuditInternalKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestToolEventRequest'
       responses:
         '202':
           description: Принято
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestToolEventResponse'
+        '401':
+          description: Неверный internal key
 components:
+  parameters:
+    AuditInternalKey:
+      name: X-Audit-Internal-Key
+      in: header
+      required: true
+      schema:
+        type: string
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
+  schemas:
+    IngestToolEventRequest:
+      type: object
+      required: [orgId, eventType, toolName, outcome]
+      properties:
+        orgId:
+          type: string
+          format: uuid
+        workspaceId:
+          type: string
+          format: uuid
+        installationId:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+          example: mcp.installation
+        toolName:
+          type: string
+        outcome:
+          type: string
+          enum: [created, deleted, success, error, denied]
+        actorUserId:
+          type: string
+          format: uuid
+        metadata:
+          type: object
+          additionalProperties: true
+    IngestToolEventResponse:
+      type: object
+      properties:
+        eventId:
+          type: string
+          format: uuid

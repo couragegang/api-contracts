@@ -12,6 +12,12 @@ apis:
     root: ai/openapi.yaml
   bff@v1:
     root: bff/openapi.yaml
+  policy@v1:
+    root: policy/openapi.yaml
+  secrets@v1:
+    root: secrets/openapi.yaml
+  audit@v1:
+    root: audit/openapi.yaml
 
 rules:
   no-unused-components: warn
