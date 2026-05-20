@@ -1,0 +1,63 @@
+openapi: 3.1.0
+info:
+  title: Billing Service API
+  version: 0.1.0-draft
+  description: |
+    Подписки и квоты только на org_id. MVP — post-MVP.
+    Seed: cursor-context/docs/billing-plans-seed.example.json
+    x-erd: cursor-context/docs/erd-and-bounded-contexts.md#10-bc-billing--quotas-billing-service-planned
+servers:
+  - url: http://localhost:8087/v1/billing
+    description: локально (порт TBD)
+tags:
+  - name: subscription
+  - name: usage
+  - name: internal
+paths:
+  /orgs/{orgId}/subscription:
+    get:
+      tags: [subscription]
+      operationId: billingSubscriptionGet
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Текущий план
+  /orgs/{orgId}/usage:
+    get:
+      tags: [usage]
+      operationId: billingUsageGet
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Счётчики по метрикам плана
+  /internal/check:
+    post:
+      tags: [internal]
+      operationId: billingCheck
+      security: []
+      responses:
+        '200':
+          description: Достаточно квоты
+        '402':
+          description: Quota exceeded
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer

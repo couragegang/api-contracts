@@ -1,0 +1,4 @@
+dist/
+node_modules/
+.redocly/
+*.bundled.yaml

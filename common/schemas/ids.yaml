@@ -1,0 +1,18 @@
+Uuid:
+  type: string
+  format: uuid
+
+OrgId:
+  type: string
+  format: uuid
+  description: organization_id (IAM)
+
+GroupId:
+  type: string
+  format: uuid
+  description: organization_groups.id (IAM)
+
+WorkspaceId:
+  type: string
+  format: uuid
+  description: workspaces.id (config-service); обязателен в продуктовых API

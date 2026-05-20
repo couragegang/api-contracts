@@ -1,0 +1,65 @@
+openapi: 3.1.0
+info:
+  title: BFF Gateway API (browser)
+  version: 0.1.0-draft
+  description: |
+    Единая точка входа Web UI. JWT → IAM introspect → прокси к доменным сервисам.
+    Не дублирует доменную логику; агрегирует публичные paths.
+servers:
+  - url: http://localhost:8082/v1/bff
+    description: локально
+tags:
+  - name: session
+  - name: proxy
+security:
+  - bearerAuth: []
+paths:
+  /api/me:
+    get:
+      tags: [session]
+      operationId: bffMe
+      summary: Профиль + контекст org/group/workspace из JWT
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BffMeResponse'
+  /api/chat:
+    post:
+      tags: [proxy]
+      operationId: bffChat
+      summary: Прокси → ai-runtime /chat
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Ответ AI
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    BffMeResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        orgId:
+          type: string
+          format: uuid
+        groupId:
+          type: string
+          format: uuid
+        workspaceId:
+          type: string
+          format: uuid
+        permissions:
+          type: array
+          items:
+            type: string

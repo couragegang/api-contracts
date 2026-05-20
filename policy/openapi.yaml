@@ -1,0 +1,68 @@
+openapi: 3.1.0
+info:
+  title: Policy Service API
+  version: 0.1.0-draft
+  description: |
+    Правила read/write/HITL. Internal apply-install-pack вызывается из mcp-gateway.
+    x-erd: cursor-context/docs/erd-and-bounded-contexts.md#6-bc-policy--hitl-policy-service-planned
+servers:
+  - url: http://localhost:8085/v1/policy
+    description: локально (порт TBD)
+tags:
+  - name: rules
+  - name: approvals
+  - name: internal
+paths:
+  /orgs/{orgId}/rules:
+    get:
+      tags: [rules]
+      operationId: policyRulesList
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Список правил
+  /orgs/{orgId}/pending-approvals:
+    get:
+      tags: [approvals]
+      operationId: policyPendingList
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: workspace_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Очередь HITL
+  /internal/apply-install-pack:
+    post:
+      tags: [internal]
+      operationId: policyApplyInstallPack
+      summary: Синхронно из mcp-gateway при установке MCP
+      security: []
+      responses:
+        '204':
+          description: Правила применены
+        '503':
+          description: Ошибка — mcp-gateway откатывает установку
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer

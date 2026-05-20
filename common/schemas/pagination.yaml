@@ -1,0 +1,10 @@
+CursorPage:
+  type: object
+  required: [items]
+  properties:
+    items:
+      type: array
+      items: {}
+    nextCursor:
+      type: string
+      nullable: true

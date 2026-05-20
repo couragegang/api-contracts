@@ -1,0 +1,52 @@
+openapi: 3.1.0
+info:
+  title: Couragegang API — Common components
+  version: 0.1.0
+  description: |
+    Переиспользуемые схемы и ответы для всех bounded contexts.
+    Подключать через `$ref` из спецификаций сервисов (см. ADR-001).
+components:
+  schemas:
+    ErrorBody:
+      $ref: './schemas/error.yaml#/ErrorBody'
+    CursorPage:
+      $ref: './schemas/pagination.yaml#/CursorPage'
+    Uuid:
+      $ref: './schemas/ids.yaml#/Uuid'
+    OrgId:
+      $ref: './schemas/ids.yaml#/OrgId'
+    GroupId:
+      $ref: './schemas/ids.yaml#/GroupId'
+    WorkspaceId:
+      $ref: './schemas/ids.yaml#/WorkspaceId'
+  responses:
+    BadRequest:
+      description: Некорректный запрос
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+    Unauthorized:
+      description: Не авторизован
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+    Forbidden:
+      description: Нет прав
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+    NotFound:
+      description: Не найдено
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'
+    Conflict:
+      description: Конфликт
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorBody'

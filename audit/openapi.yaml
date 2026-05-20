@@ -1,0 +1,49 @@
+openapi: 3.1.0
+info:
+  title: Audit Service API
+  version: 0.1.0-draft
+  description: |
+    Platform audit — tool-calls, admin events.
+    x-erd: cursor-context/docs/erd-and-bounded-contexts.md#9-bc-platform-audit-audit-service
+servers:
+  - url: http://localhost:8086/v1/audit
+    description: локально (порт TBD)
+tags:
+  - name: tool-events
+  - name: internal
+paths:
+  /orgs/{orgId}/tool-events:
+    get:
+      tags: [tool-events]
+      operationId: auditToolEventsList
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: workspace_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Журнал вызовов инструментов
+  /internal/tool-events:
+    post:
+      tags: [internal]
+      operationId: auditToolEventsIngest
+      summary: Append-only ingest (ai-runtime / mcp-gateway)
+      security: []
+      responses:
+        '202':
+          description: Принято
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer

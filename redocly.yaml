@@ -1,0 +1,18 @@
+extends:
+  - recommended
+
+apis:
+  iam@v1:
+    root: iam/openapi.yaml
+  config@v1:
+    root: config/openapi.yaml
+  mcp@v1:
+    root: mcp/openapi.yaml
+  ai@v1:
+    root: ai/openapi.yaml
+  bff@v1:
+    root: bff/openapi.yaml
+
+rules:
+  no-unused-components: warn
+  operation-operationId: error
