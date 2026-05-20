@@ -1,15 +1,16 @@
 openapi: 3.1.0
 info:
   title: Config Service API
-  version: 0.1.0-draft
+  version: 0.1.0
   description: |
     Workspaces и настройки org. **Не** хранит MCP installations (см. mcp-gateway).
     x-erd: cursor-context/docs/erd-and-bounded-contexts.md#3-bc-workspace--config-config-service
 servers:
   - url: http://localhost:8084/v1/config
-    description: локально (порт TBD)
+    description: локально
 tags:
   - name: workspaces
+  - name: internal
 security:
   - bearerAuth: []
 paths:
@@ -77,6 +78,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Workspace'
+
+  /internal/orgs/{orgId}/bootstrap-default-workspace:
+    post:
+      tags: [internal]
+      operationId: configBootstrapDefaultWorkspace
+      summary: Создать default workspace в default group (IAM при create org)
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
+        - name: X-Config-Internal-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BootstrapDefaultWorkspaceRequest'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -149,3 +177,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Workspace'
+
+    BootstrapDefaultWorkspaceRequest:
+      type: object
+      required: [defaultGroupId]
+      properties:
+        defaultGroupId:
+          type: string
+          format: uuid
+        orgName:
+          type: string
+          description: Для отображаемого имени workspace
