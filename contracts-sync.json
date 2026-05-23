@@ -20,6 +20,54 @@
       "serviceRepo": "couragegang/mcp-gateway",
       "serviceDir": "mcp-gateway",
       "serviceCopy": "openapi/openapi.yaml"
+    },
+    {
+      "id": "ai",
+      "canonical": "ai/openapi.yaml",
+      "serviceRepo": "couragegang/ai-runtime",
+      "serviceDir": "ai-runtime",
+      "serviceCopy": "openapi/openapi.yaml"
+    },
+    {
+      "id": "bff",
+      "canonical": "bff/openapi.yaml",
+      "serviceRepo": "couragegang/bff-gateway",
+      "serviceDir": "bff-gateway",
+      "serviceCopy": "openapi/openapi.yaml"
+    },
+    {
+      "id": "policy",
+      "canonical": "policy/openapi.yaml",
+      "serviceRepo": "couragegang/policy-service",
+      "serviceDir": "policy-service",
+      "serviceCopy": "openapi/openapi.yaml"
+    },
+    {
+      "id": "secrets",
+      "canonical": "secrets/openapi.yaml",
+      "serviceRepo": "couragegang/secrets-service",
+      "serviceDir": "secrets-service",
+      "serviceCopy": "openapi/openapi.yaml"
+    },
+    {
+      "id": "audit",
+      "canonical": "audit/openapi.yaml",
+      "serviceRepo": "couragegang/audit-service",
+      "serviceDir": "audit-service",
+      "serviceCopy": "openapi/openapi.yaml"
+    },
+    {
+      "id": "billing",
+      "canonical": "billing/openapi.yaml",
+      "serviceRepo": "couragegang/billing-service",
+      "serviceDir": "billing-service",
+      "serviceCopy": "openapi/openapi.yaml"
+    }
+  ],
+  "canonicalOnly": [
+    {
+      "id": "common",
+      "note": "Общие схемы (ErrorBody, pagination, ids) — только в api-contracts/common/; зеркала в BC по мере внедрения $ref"
     }
   ]
 }

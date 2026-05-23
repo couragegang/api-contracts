@@ -17,10 +17,11 @@ paths:
   /api/me:
     get:
       tags: [session]
-      operationId: bffMe
       summary: Профиль + контекст org/group/workspace из JWT
+      operationId: bffMe
       responses:
         '200':
+          description: OK
           content:
             application/json:
               schema:
@@ -28,8 +29,8 @@ paths:
   /api/chat:
     post:
       tags: [proxy]
-      operationId: bffChat
       summary: Прокси → ai-runtime /chat
+      operationId: bffChat
       requestBody:
         content:
           application/json:
@@ -38,6 +39,80 @@ paths:
       responses:
         '200':
           description: Ответ AI
+  /api/config/orgs/{orgId}/workspaces:
+    get:
+      tags: [proxy]
+      summary: Прокси → config-service list workspaces
+      operationId: bffConfigWorkspacesList
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: group_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: WorkspaceListResponse
+    post:
+      tags: [proxy]
+      summary: Прокси → config-service create workspace
+      operationId: bffConfigWorkspacesCreate
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Workspace created
+  /api/config/workspaces/{workspaceId}:
+    get:
+      tags: [proxy]
+      summary: Прокси → config-service get workspace
+      operationId: bffConfigWorkspaceGet
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Workspace
+    patch:
+      tags: [proxy]
+      summary: Прокси → config-service patch workspace
+      operationId: bffConfigWorkspacePatch
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Workspace updated
 components:
   securitySchemes:
     bearerAuth:

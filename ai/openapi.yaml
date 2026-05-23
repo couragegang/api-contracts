@@ -17,8 +17,8 @@ paths:
   /chat:
     post:
       tags: [chat]
-      operationId: aiChat
       summary: Отправить сообщение (sync или SSE stream)
+      operationId: aiChat
       requestBody:
         required: true
         content:
@@ -27,6 +27,7 @@ paths:
               $ref: '#/components/schemas/ChatRequest'
       responses:
         '200':
+          description: OK
           content:
             application/json:
               schema:
@@ -38,6 +39,7 @@ paths:
   /conversations:
     get:
       tags: [conversations]
+      summary: Ai Conversations List
       operationId: aiConversationsList
       parameters:
         - name: workspace_id
@@ -48,6 +50,7 @@ paths:
             format: uuid
       responses:
         '200':
+          description: OK
           content:
             application/json:
               schema:
@@ -55,6 +58,7 @@ paths:
   /conversations/{conversationId}/messages:
     get:
       tags: [conversations]
+      summary: Ai Messages List
       operationId: aiMessagesList
       parameters:
         - name: conversationId
@@ -65,6 +69,7 @@ paths:
             format: uuid
       responses:
         '200':
+          description: OK
           content:
             application/json:
               schema:
@@ -72,6 +77,7 @@ paths:
   /agent-runs/{runId}:
     get:
       tags: [chat]
+      summary: Ai Agent Run Get
       operationId: aiAgentRunGet
       parameters:
         - name: runId
@@ -82,6 +88,7 @@ paths:
             format: uuid
       responses:
         '200':
+          description: OK
           content:
             application/json:
               schema:
@@ -102,7 +109,6 @@ components:
         conversationId:
           type: string
           format: uuid
-          nullable: true
         message:
           type: string
     ChatResponse:

@@ -19,8 +19,9 @@
 | [`bff/openapi.yaml`](bff/openapi.yaml) | bff-gateway | `/v1/bff` | черновик |
 | [`policy/openapi.yaml`](policy/openapi.yaml) | policy-service | `/v1/policy` | черновик |
 | [`audit/openapi.yaml`](audit/openapi.yaml) | audit-service | `/v1/audit` | черновик |
+| [`secrets/openapi.yaml`](secrets/openapi.yaml) | secrets-service | `/v1/secrets` | черновик |
 | [`billing/openapi.yaml`](billing/openapi.yaml) | billing-service | `/v1/billing` | черновик |
-| [`common/`](common/) | — | — | общие схемы |
+| [`common/`](common/) | — | — | общие схемы (без зеркала в BC, см. `canonicalOnly` в sync) |
 
 ## Правила
 
@@ -35,7 +36,7 @@
 
 | Job | Назначение |
 |-----|------------|
-| **contract-freshness** | Канон совпадает с зеркалами в сервисах ([`contracts-sync.json`](contracts-sync.json)); в CI клонируются `iam-service`, `config-service`, `mcp-gateway` |
+| **contract-freshness** | Канон совпадает с зеркалами в сервисах ([`contracts-sync.json`](contracts-sync.json)); в CI клонируются все репозитории из `mirrors[]` |
 | **redocly-lint** | `redocly lint` по [`redocly.yaml`](redocly.yaml) |
 
 ```bash
@@ -49,12 +50,12 @@ PowerShell: [`scripts/verify-quality.ps1`](scripts/verify-quality.ps1). Уста
 
 ## Зеркала OpenAPI в сервисах
 
-Канон — файлы в этом репозитории. Копии для codegen/доков — см. [`contracts-sync.json`](contracts-sync.json).
+Канон — файлы в этом репозитории. Копии для codegen/доков — [`contracts-sync.json`](contracts-sync.json) (`mirrors[]`: iam, config, mcp, ai, bff, policy, secrets, audit, billing).
 
 После правок контракта синхронизировать зеркало:
 
 ```bash
-./scripts/sync-openapi-mirror.sh iam    # или config, mcp
+./scripts/sync-openapi-mirror.sh iam    # id из contracts-sync.json (iam, config, mcp, ai, bff, …)
 ./scripts/sync-iam-openapi.sh           # alias для iam
 ```
 

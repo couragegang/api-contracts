@@ -17,6 +17,7 @@ paths:
   /orgs/{orgId}/subscription:
     get:
       tags: [subscription]
+      summary: Billing Subscription Get
       operationId: billingSubscriptionGet
       security:
         - bearerAuth: []
@@ -33,6 +34,7 @@ paths:
   /orgs/{orgId}/usage:
     get:
       tags: [usage]
+      summary: Billing Usage Get
       operationId: billingUsageGet
       security:
         - bearerAuth: []
@@ -49,6 +51,7 @@ paths:
   /internal/check:
     post:
       tags: [internal]
+      summary: Billing Check
       operationId: billingCheck
       security: []
       responses:

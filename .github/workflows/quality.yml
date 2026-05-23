@@ -21,16 +21,18 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p .ci-checkouts
-          clone() {
-            local repo="$1"
-            local dir="$2"
-            if [ ! -d ".ci-checkouts/${dir}/.git" ]; then
-              git clone --depth 1 "https://github.com/${repo}.git" ".ci-checkouts/${dir}"
-            fi
+          node -e "
+          const { mirrors } = require('./contracts-sync.json');
+          for (const m of mirrors) {
+            console.log(m.serviceRepo + '\t' + m.serviceDir);
           }
-          clone couragegang/iam-service iam-service
-          clone couragegang/config-service config-service
-          clone couragegang/mcp-gateway mcp-gateway
+          " | while IFS=$'\t' read -r repo dir; do
+            if [ ! -d ".ci-checkouts/${dir}/.git" ]; then
+              git clone --depth 1 "https://github.com/${repo}.git" ".ci-checkouts/${dir}" || {
+                echo "::warning::Could not clone ${repo} (mirror check may fail if repo missing)"
+              }
+            fi
+          done
 
       - name: Verify contract freshness (quality gate)
         env:

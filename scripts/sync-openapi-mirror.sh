@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Копирует канон OpenAPI в зеркало сервиса (см. contracts-sync.json, поле id).
 set -euo pipefail
-ID="${1:?Usage: $0 <iam|config|mcp>}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+IDS="$(node -e "const m=require('${ROOT}/contracts-sync.json');console.log(m.mirrors.map(x=>x.id).join('|'))")"
+ID="${1:?Usage: $0 <${IDS}>}"
 node -e "
 const fs = require('fs');
 const path = require('path');

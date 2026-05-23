@@ -15,6 +15,7 @@ paths:
   /orgs/{orgId}/tool-events:
     get:
       tags: [tool-events]
+      summary: Audit Tool Events List
       operationId: auditToolEventsList
       security:
         - bearerAuth: []
@@ -36,8 +37,8 @@ paths:
   /internal/tool-events:
     post:
       tags: [internal]
-      operationId: auditToolEventsIngest
       summary: Append-only ingest (mcp-gateway / ai-runtime)
+      operationId: auditToolEventsIngest
       security: []
       parameters:
         - $ref: '#/components/parameters/AuditInternalKey'
