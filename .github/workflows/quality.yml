@@ -2,9 +2,9 @@ name: API contracts quality
 
 on:
   push:
-    branches: [main]
+    branches: [test, main]
   pull_request:
-    branches: [main]
+    branches: [test, main]
 
 jobs:
   contract-freshness:
