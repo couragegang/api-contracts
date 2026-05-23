@@ -29,17 +29,35 @@
 3. **Версионирование** — semver в `info.version` каждого spec; breaking changes — отдельный PR + oasdiff.
 4. **Internal paths** — tag `internal`, не включать в BFF bundle для браузера.
 
-## Локальная проверка
+## Локальная проверка и CI
+
+**Quality gate** (GitHub Actions [`.github/workflows/quality.yml`](.github/workflows/quality.yml)):
+
+| Job | Назначение |
+|-----|------------|
+| **contract-freshness** | Канон совпадает с зеркалами в сервисах ([`contracts-sync.json`](contracts-sync.json)); в CI клонируются `iam-service`, `config-service`, `mcp-gateway` |
+| **redocly-lint** | `redocly lint` по [`redocly.yaml`](redocly.yaml) |
 
 ```bash
-# Redocly (опционально: npm i -g @redocly/cli)
-redocly lint iam/openapi.yaml
-redocly bundle iam/openapi.yaml -o dist/iam-bundled.yaml
+cd services/api-contracts
+npm run quality          # актуальность зеркал (monorepo: SERVICES_ROOT=.. по умолчанию)
+npm ci && npm run quality:full   # + Redocly lint
+npm run lint             # только Redocly
 ```
 
-Скрипт-обёртка: [`scripts/lint.ps1`](scripts/lint.ps1).
+PowerShell: [`scripts/verify-quality.ps1`](scripts/verify-quality.ps1). Устаревший пофайловый lint: [`scripts/lint.ps1`](scripts/lint.ps1).
 
-## Связь с `iam-service`
+## Зеркала OpenAPI в сервисах
 
-Спека IAM перенесена сюда и дополнена **V4** (groups, `accessScope`, invite `groupId`).  
-В `iam-service/openapi/openapi.yaml` — синхронизировать при следующем изменении API (или submodule).
+Канон — файлы в этом репозитории. Копии для codegen/доков — см. [`contracts-sync.json`](contracts-sync.json).
+
+После правок контракта синхронизировать зеркало:
+
+```bash
+./scripts/sync-openapi-mirror.sh iam    # или config, mcp
+./scripts/sync-iam-openapi.sh           # alias для iam
+```
+
+```powershell
+.\scripts\sync-openapi-mirror.ps1 -Id iam
+```

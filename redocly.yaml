@@ -18,6 +18,8 @@ apis:
     root: secrets/openapi.yaml
   audit@v1:
     root: audit/openapi.yaml
+  billing@v1:
+    root: billing/openapi.yaml
 
 rules:
   no-unused-components: warn

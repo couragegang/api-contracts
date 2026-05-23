@@ -1,0 +1,25 @@
+{
+  "mirrors": [
+    {
+      "id": "iam",
+      "canonical": "iam/openapi.yaml",
+      "serviceRepo": "couragegang/iam-service",
+      "serviceDir": "iam-service",
+      "serviceCopy": "openapi/openapi.yaml"
+    },
+    {
+      "id": "config",
+      "canonical": "config/openapi.yaml",
+      "serviceRepo": "couragegang/config-service",
+      "serviceDir": "config-service",
+      "serviceCopy": "openapi/openapi.yaml"
+    },
+    {
+      "id": "mcp",
+      "canonical": "mcp/openapi.yaml",
+      "serviceRepo": "couragegang/mcp-gateway",
+      "serviceDir": "mcp-gateway",
+      "serviceCopy": "openapi/openapi.yaml"
+    }
+  ]
+}

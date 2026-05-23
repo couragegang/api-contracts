@@ -1,0 +1,54 @@
+name: API contracts quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  contract-freshness:
+    name: canonical vs service mirrors
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Clone service OpenAPI mirrors
+        run: |
+          set -euo pipefail
+          mkdir -p .ci-checkouts
+          clone() {
+            local repo="$1"
+            local dir="$2"
+            if [ ! -d ".ci-checkouts/${dir}/.git" ]; then
+              git clone --depth 1 "https://github.com/${repo}.git" ".ci-checkouts/${dir}"
+            fi
+          }
+          clone couragegang/iam-service iam-service
+          clone couragegang/config-service config-service
+          clone couragegang/mcp-gateway mcp-gateway
+
+      - name: Verify contract freshness (quality gate)
+        env:
+          SERVICES_ROOT: ${{ github.workspace }}/.ci-checkouts
+          REQUIRE_SYNC_CHECK: "1"
+        run: node scripts/verify-sync.mjs
+
+  redocly-lint:
+    name: OpenAPI lint (Redocly)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - run: npm ci
+      - run: npm run lint

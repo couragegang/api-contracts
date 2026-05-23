@@ -1,0 +1,14 @@
+{
+  "name": "api-contracts",
+  "private": true,
+  "description": "OpenAPI contracts — lint and sync quality gate",
+  "scripts": {
+    "lint": "redocly lint",
+    "verify:sync": "node scripts/verify-sync.mjs",
+    "quality": "node scripts/verify-sync.mjs",
+    "quality:full": "bash scripts/verify-quality.sh"
+  },
+  "devDependencies": {
+    "@redocly/cli": "1.25.0"
+  }
+}
