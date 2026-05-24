@@ -14,7 +14,8 @@
 |------|--------|-------------------|--------|
 | [`iam/openapi.yaml`](iam/openapi.yaml) | iam-service | `/v1/iam` | **канон** (V4 groups) |
 | [`config/openapi.yaml`](config/openapi.yaml) | config-service | `/v1/config` | черновик |
-| [`mcp/openapi.yaml`](mcp/openapi.yaml) | mcp-gateway | `/v1/mcp` | черновик |
+| [`mcp/openapi.yaml`](mcp/openapi.yaml) | mcp-gateway | `/v1/mcp` | черновик (control plane) |
+| — | **mcp-notion**, … | `/v1/{connector}` | **[`mcp-connector-contracts`](../mcp-connector-contracts/)** — runtime invoke/health/discover |
 | [`ai/openapi.yaml`](ai/openapi.yaml) | ai-runtime | `/v1/ai` | черновик |
 | [`bff/openapi.yaml`](bff/openapi.yaml) | bff-gateway | `/v1/bff` | черновик |
 | [`policy/openapi.yaml`](policy/openapi.yaml) | policy-service | `/v1/policy` | черновик |
