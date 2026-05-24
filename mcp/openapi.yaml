@@ -78,6 +78,20 @@ paths:
         '502':
           description: policy_apply_failed — откат установки
   /workspaces/{workspaceId}/installations/{installationId}:
+    get:
+      tags: [installations]
+      summary: Детали установки для редактирования
+      operationId: mcpInstallationsGet
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/InstallationId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstallationDetail'
     patch:
       tags: [installations]
       summary: Mcp Installations Patch
@@ -85,6 +99,11 @@ paths:
       parameters:
         - $ref: '#/components/parameters/WorkspaceId'
         - $ref: '#/components/parameters/InstallationId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstallationUpdateRequest'
       responses:
         '200':
           description: OK
@@ -158,6 +177,11 @@ components:
           description: JSON Schema для формы установки
         policyPackVersion:
           type: string
+        description:
+          type: string
+        policyTemplatePack:
+          type: object
+          description: Шаблон правил policy-service (rules[])
     CatalogListResponse:
       type: object
       required: [items]
@@ -195,6 +219,31 @@ components:
           type: object
           additionalProperties: true
           description: Поля по connection_form_schema
+        policyPack:
+          type: object
+          description: Опционально — переопределение policy_template_pack (требует iam.member.manage через BFF)
+    InstallationUpdateRequest:
+      type: object
+      properties:
+        displayLabel:
+          type: string
+        form:
+          type: object
+          additionalProperties: true
+          description: Частичное обновление; секреты — только при непустом значении
+    InstallationDetail:
+      type: object
+      required: [installation, connectionFormSchema, config, secretsConfigured]
+      properties:
+        installation:
+          $ref: '#/components/schemas/Installation'
+        connectionFormSchema:
+          type: object
+        config:
+          type: object
+          additionalProperties: true
+        secretsConfigured:
+          type: boolean
     InstallationListResponse:
       type: object
       required: [items]

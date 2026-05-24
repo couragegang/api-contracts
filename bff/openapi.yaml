@@ -1,36 +1,34 @@
 openapi: 3.1.0
 info:
   title: BFF Gateway API (browser)
-  version: 0.1.0-draft
+  version: 0.2.0
   description: |
-    Единая точка входа Web UI. JWT → IAM introspect → прокси к доменным сервисам.
-    Не дублирует доменную логику; агрегирует публичные paths.
+    Единая точка входа Web UI (`/v1/bff/api/*`). JWT → IAM introspect → прокси.
+    Полный список маршрутов UI — `BffUiRoutes` в bff-gateway.
 servers:
   - url: http://localhost:8082/v1/bff
     description: локально
 tags:
   - name: session
-  - name: proxy
+  - name: auth
+  - name: organizations
+  - name: config
+  - name: chat
+  - name: mcp
+  - name: policy
 security:
   - bearerAuth: []
 paths:
   /api/me:
     get:
       tags: [session]
-      summary: Профиль + контекст org/group/workspace из JWT
       operationId: bffMe
       responses:
         '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BffMeResponse'
-  /api/chat:
-    post:
-      tags: [proxy]
-      summary: Прокси → ai-runtime /chat
-      operationId: bffChat
+          description: JWT + user + organizations
+    patch:
+      tags: [session]
+      operationId: bffMePatch
       requestBody:
         content:
           application/json:
@@ -38,19 +36,133 @@ paths:
               type: object
       responses:
         '200':
-          description: Ответ AI
-  /api/config/orgs/{orgId}/workspaces:
+          description: OK
+  /api/auth/login:
+    post:
+      tags: [auth]
+      security: []
+      operationId: bffAuthLogin
+      responses:
+        '200':
+          description: tokens
+  /api/auth/register:
+    post:
+      tags: [auth]
+      security: []
+      operationId: bffAuthRegister
+      responses:
+        '200':
+          description: tokens
+  /api/auth/logout:
+    post:
+      tags: [auth]
+      security: []
+      operationId: bffAuthLogout
+      responses:
+        '204':
+          description: OK
+  /api/auth/switch-org:
+    post:
+      tags: [auth]
+      operationId: bffAuthSwitchOrg
+      responses:
+        '200':
+          description: tokens
+  /api/organizations:
+    post:
+      tags: [organizations]
+      operationId: bffOrgCreate
+      responses:
+        '201':
+          description: created
+  /api/organizations/{orgId}:
     get:
-      tags: [proxy]
-      summary: Прокси → config-service list workspaces
-      operationId: bffConfigWorkspacesList
+      tags: [organizations]
+      operationId: bffOrgGet
       parameters:
-        - name: orgId
+        - $ref: '#/components/parameters/OrgId'
+      responses:
+        '200':
+          description: OK
+    patch:
+      tags: [organizations]
+      operationId: bffOrgPatch
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
+      responses:
+        '200':
+          description: OK
+  /api/organizations/{orgId}/my-groups:
+    get:
+      tags: [organizations]
+      operationId: bffOrgMyGroups
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
+      responses:
+        '200':
+          description: OK
+  /api/organizations/{orgId}/groups:
+    get:
+      tags: [organizations]
+      operationId: bffOrgGroups
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
+      responses:
+        '200':
+          description: OK
+    post:
+      tags: [organizations]
+      operationId: bffOrgCreateGroup
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
+      responses:
+        '201':
+          description: created
+  /api/organizations/{orgId}/invites:
+    get:
+      tags: [organizations]
+      operationId: bffOrgInvites
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
+      responses:
+        '200':
+          description: OK
+    post:
+      tags: [organizations]
+      operationId: bffOrgCreateInvite
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
+      responses:
+        '201':
+          description: created
+  /api/organizations/{orgId}/invites/{inviteId}:
+    delete:
+      tags: [organizations]
+      operationId: bffOrgRevokeInvite
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
+        - name: inviteId
           in: path
           required: true
           schema:
             type: string
             format: uuid
+      responses:
+        '204':
+          description: OK
+  /api/invites/accept:
+    post:
+      tags: [organizations]
+      operationId: bffInviteAccept
+      responses:
+        '200':
+          description: OK
+  /api/config/orgs/{orgId}/workspaces:
+    get:
+      tags: [config]
+      operationId: bffConfigWorkspacesList
+      parameters:
+        - $ref: '#/components/parameters/OrgId'
         - name: group_id
           in: query
           schema:
@@ -58,66 +170,212 @@ paths:
             format: uuid
       responses:
         '200':
-          description: WorkspaceListResponse
+          description: OK
     post:
-      tags: [proxy]
-      summary: Прокси → config-service create workspace
+      tags: [config]
       operationId: bffConfigWorkspacesCreate
       parameters:
-        - name: orgId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
+        - $ref: '#/components/parameters/OrgId'
       responses:
         '201':
-          description: Workspace created
+          description: created
   /api/config/workspaces/{workspaceId}:
-    get:
-      tags: [proxy]
-      summary: Прокси → config-service get workspace
-      operationId: bffConfigWorkspaceGet
-      parameters:
-        - name: workspaceId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: Workspace
     patch:
-      tags: [proxy]
-      summary: Прокси → config-service patch workspace
+      tags: [config]
       operationId: bffConfigWorkspacePatch
       parameters:
-        - name: workspaceId
+        - $ref: '#/components/parameters/WorkspaceId'
+      responses:
+        '200':
+          description: OK
+  /api/chat:
+    post:
+      tags: [chat]
+      operationId: bffChat
+      responses:
+        '200':
+          description: OK
+  /api/conversations:
+    get:
+      tags: [chat]
+      operationId: bffConversationsList
+      parameters:
+        - name: include_archived
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+    post:
+      tags: [chat]
+      operationId: bffConversationsCreate
+      responses:
+        '201':
+          description: created
+  /api/conversations/{conversationId}/messages:
+    get:
+      tags: [chat]
+      operationId: bffConversationMessages
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+      responses:
+        '200':
+          description: OK
+  /api/conversations/{conversationId}:
+    patch:
+      tags: [chat]
+      operationId: bffConversationArchive
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+      responses:
+        '200':
+          description: OK
+    delete:
+      tags: [chat]
+      operationId: bffConversationDelete
+      parameters:
+        - $ref: '#/components/parameters/ConversationId'
+      responses:
+        '204':
+          description: OK
+  /api/mcp/catalog:
+    get:
+      tags: [mcp]
+      operationId: bffMcpCatalog
+      responses:
+        '200':
+          description: OK
+  /api/mcp/catalog/{connectorKey}:
+    get:
+      tags: [mcp]
+      operationId: bffMcpCatalogItem
+      parameters:
+        - name: connectorKey
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+  /api/mcp/workspaces/{workspaceId}/installations:
+    get:
+      tags: [mcp]
+      operationId: bffMcpInstallations
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceId'
+      responses:
+        '200':
+          description: OK
+    post:
+      tags: [mcp]
+      operationId: bffMcpInstall
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceId'
+      responses:
+        '201':
+          description: created
+  /api/mcp/workspaces/{workspaceId}/installations/{installationId}:
+    get:
+      tags: [mcp]
+      operationId: bffMcpInstallationGet
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/InstallationId'
+      responses:
+        '200':
+          description: OK
+    patch:
+      tags: [mcp]
+      operationId: bffMcpInstallationPatch
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/InstallationId'
+      responses:
+        '200':
+          description: OK
+    delete:
+      tags: [mcp]
+      operationId: bffMcpInstallationDelete
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/InstallationId'
+      responses:
+        '204':
+          description: OK
+  /api/mcp/workspaces/{workspaceId}/installations/{installationId}/health:
+    post:
+      tags: [mcp]
+      operationId: bffMcpInstallationHealth
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceId'
+        - $ref: '#/components/parameters/InstallationId'
+      responses:
+        '200':
+          description: OK
+  /api/policy/pending-approvals/{id}/approve:
+    post:
+      tags: [policy]
+      operationId: bffPolicyApprove
+      parameters:
+        - name: id
           in: path
           required: true
           schema:
             type: string
             format: uuid
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
       responses:
         '200':
-          description: Workspace updated
+          description: OK
+  /api/policy/pending-approvals/{id}/reject:
+    post:
+      tags: [policy]
+      operationId: bffPolicyReject
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
+  parameters:
+    OrgId:
+      name: orgId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    WorkspaceId:
+      name: workspaceId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ConversationId:
+      name: conversationId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    InstallationId:
+      name: installationId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
   schemas:
     BffMeResponse:
       type: object
@@ -126,12 +384,6 @@ components:
           type: string
           format: uuid
         orgId:
-          type: string
-          format: uuid
-        groupId:
-          type: string
-          format: uuid
-        workspaceId:
           type: string
           format: uuid
         permissions:
