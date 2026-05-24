@@ -62,12 +62,23 @@
       "serviceRepo": "couragegang/billing-service",
       "serviceDir": "billing-service",
       "serviceCopy": "openapi/openapi.yaml"
+    },
+    {
+      "id": "mcp-notion",
+      "canonical": "mcp-connectors/connectors/notion/openapi.yaml",
+      "serviceRepo": "couragegang/mcp-notion",
+      "serviceDir": "mcp-notion",
+      "serviceCopy": "openapi/openapi.yaml"
     }
   ],
   "canonicalOnly": [
     {
       "id": "common",
       "note": "Общие схемы (ErrorBody, pagination, ids) — только в api-contracts/common/; зеркала в BC по мере внедрения $ref"
+    },
+    {
+      "id": "mcp-connectors-runtime",
+      "note": "Общий runtime surface — mcp-connectors/runtime/openapi.yaml; подключается через $ref в connectors/*/openapi.yaml"
     }
   ]
 }

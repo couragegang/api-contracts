@@ -1,0 +1,202 @@
+openapi: 3.1.0
+info:
+  title: MCP connector runtime (shared internal API)
+  version: 0.1.0
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
+  description: |
+    Общие internal-операции для всех `mcp-{connector}` BC.
+    Каждый коннектор публикует те же пути под своим `servers.url`
+    (например `http://mcp-notion:8091/v1/notion`).
+
+    Канон — `api-contracts/mcp-connectors/runtime/openapi.yaml`.
+    Полные spec по коннектору — `mcp-connectors/connectors/{connectorKey}/openapi.yaml`.
+
+servers:
+  - url: http://mcp-notion:8091/v1/notion
+    description: Example server URL — each connector spec overrides `servers`
+
+tags:
+  - name: internal
+    description: Service-to-service only (mcp-gateway → connector)
+
+security:
+  - InternalApiKey: []
+
+paths:
+  /internal/tools/invoke:
+    post:
+      operationId: invokeTool
+      tags: [internal]
+      summary: Execute a connector tool for a workspace installation
+      security:
+        - InternalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ToolInvokeRequest'
+      responses:
+        '200':
+          description: Tool result (business ok or failure encoded in body)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolInvokeResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '../../common/schemas/error.yaml#/ErrorBody'
+        '401':
+          description: Missing or invalid internal API key
+          content:
+            application/json:
+              schema:
+                $ref: '../../common/schemas/error.yaml#/ErrorBody'
+
+  /internal/health:
+    post:
+      operationId: probeHealth
+      tags: [internal]
+      summary: Health probe for an installation (merged config + secrets)
+      security:
+        - InternalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstallationContext'
+      responses:
+        '200':
+          description: Probe result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthProbeResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../../common/schemas/error.yaml#/ErrorBody'
+
+  /internal/normalize-config:
+    post:
+      operationId: normalizeConfig
+      tags: [internal]
+      summary: Normalize connection config after form split (install/update)
+      security:
+        - InternalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NormalizeConfigRequest'
+      responses:
+        '200':
+          description: Normalized config map
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NormalizeConfigResponse'
+        '400':
+          description: Invalid config
+          content:
+            application/json:
+              schema:
+                $ref: '../../common/schemas/error.yaml#/ErrorBody'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../../common/schemas/error.yaml#/ErrorBody'
+
+components:
+  securitySchemes:
+    InternalApiKey:
+      type: apiKey
+      in: header
+      name: X-Internal-Api-Key
+      description: Shared secret between mcp-gateway and connector runtime
+
+  schemas:
+    InstallationContext:
+      type: object
+      required: [installationId, workspaceId, orgId, connectionConfig, credentialSecretRef]
+      properties:
+        installationId:
+          $ref: '../../common/schemas/ids.yaml#/Uuid'
+        workspaceId:
+          $ref: '../../common/schemas/ids.yaml#/Uuid'
+        orgId:
+          $ref: '../../common/schemas/ids.yaml#/Uuid'
+        connectionConfig:
+          type: object
+          additionalProperties: true
+          description: Non-secret connection fields from installation
+        credentialSecretRef:
+          type: string
+          description: Reference in secrets-service, or `local:none`
+          examples: ['secrets:uuid', 'local:none']
+
+    ToolInvokeRequest:
+      allOf:
+        - $ref: '#/components/schemas/InstallationContext'
+        - type: object
+          required: [toolName]
+          properties:
+            toolName:
+              type: string
+              description: Tool name from catalog (e.g. notion_write_page)
+            arguments:
+              type: object
+              additionalProperties: true
+              description: Tool arguments from LLM / router
+
+    ToolInvokeResponse:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+        summary:
+          type: string
+          description: Human-readable success text for chat
+        error:
+          type: string
+          description: Present when ok is false
+
+    HealthProbeResponse:
+      type: object
+      required: [ok, message]
+      properties:
+        ok:
+          type: boolean
+        message:
+          type: string
+
+    NormalizeConfigRequest:
+      type: object
+      required: [connectorKey, connectionConfig]
+      properties:
+        connectorKey:
+          type: string
+          examples: [notion]
+        connectionConfig:
+          type: object
+          additionalProperties: true
+
+    NormalizeConfigResponse:
+      type: object
+      required: [connectionConfig]
+      properties:
+        connectionConfig:
+          type: object
+          additionalProperties: true

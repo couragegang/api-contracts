@@ -1,0 +1,103 @@
+openapi: 3.1.0
+info:
+  title: mcp-notion connector API
+  version: 0.1.0
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
+  description: |
+    Notion MCP connector runtime (`couragegang/mcp-notion`).
+    Shared internal paths — `mcp-connectors/runtime/openapi.yaml`;
+    Notion-specific — `/internal/discover`.
+
+servers:
+  - url: http://localhost:8091/v1/notion
+    description: Local docker compose (host)
+  - url: http://mcp-notion:8091/v1/notion
+    description: Docker network (mcp-gateway → connector)
+
+tags:
+  - name: internal
+    description: Service-to-service only
+
+security:
+  - InternalApiKey: []
+
+paths:
+  /internal/tools/invoke:
+    $ref: '../../runtime/openapi.yaml#/paths/~1internal~1tools~1invoke'
+  /internal/health:
+    $ref: '../../runtime/openapi.yaml#/paths/~1internal~1health'
+  /internal/normalize-config:
+    $ref: '../../runtime/openapi.yaml#/paths/~1internal~1normalize-config'
+
+  /internal/discover:
+    post:
+      operationId: discoverResources
+      tags: [internal]
+      summary: List Notion databases/pages for installation setup
+      security:
+        - InternalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotionDiscoverRequest'
+      responses:
+        '200':
+          description: Discoverable resources
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotionDiscoverResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '../../../common/schemas/error.yaml#/ErrorBody'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../../../common/schemas/error.yaml#/ErrorBody'
+
+components:
+  securitySchemes:
+    InternalApiKey:
+      $ref: '../../runtime/openapi.yaml#/components/securitySchemes/InternalApiKey'
+
+  schemas:
+    NotionDiscoverRequest:
+      type: object
+      required: [integrationToken]
+      properties:
+        integrationToken:
+          type: string
+          description: Notion internal integration token (setup flow only)
+
+    NotionResourceItem:
+      type: object
+      required: [id, title, kind]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        url:
+          type: string
+          format: uri
+        kind:
+          type: string
+          examples: [database, page]
+
+    NotionDiscoverResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotionResourceItem'

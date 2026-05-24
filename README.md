@@ -15,7 +15,7 @@
 | [`iam/openapi.yaml`](iam/openapi.yaml) | iam-service | `/v1/iam` | **канон** (V4 groups) |
 | [`config/openapi.yaml`](config/openapi.yaml) | config-service | `/v1/config` | черновик |
 | [`mcp/openapi.yaml`](mcp/openapi.yaml) | mcp-gateway | `/v1/mcp` | черновик (control plane) |
-| — | **mcp-notion**, … | `/v1/{connector}` | **[`mcp-connector-contracts`](../mcp-connector-contracts/)** — runtime invoke/health/discover |
+| [`mcp-connectors/`](mcp-connectors/) | **mcp-notion**, … | `/v1/{connector}` | runtime invoke/health/discover ([ADR-002](../../cursor-context/docs/adr-002-mcp-connector-runtime-http.md)) |
 | [`ai/openapi.yaml`](ai/openapi.yaml) | ai-runtime | `/v1/ai` | черновик |
 | [`bff/openapi.yaml`](bff/openapi.yaml) | bff-gateway | `/v1/bff` | черновик |
 | [`policy/openapi.yaml`](policy/openapi.yaml) | policy-service | `/v1/policy` | черновик |
@@ -51,7 +51,7 @@ PowerShell: [`scripts/verify-quality.ps1`](scripts/verify-quality.ps1). Уста
 
 ## Зеркала OpenAPI в сервисах
 
-Канон — файлы в этом репозитории. Копии для codegen/доков — [`contracts-sync.json`](contracts-sync.json) (`mirrors[]`: iam, config, mcp, ai, bff, policy, secrets, audit, billing).
+Канон — файлы в этом репозитории. Копии для codegen/доков — [`contracts-sync.json`](contracts-sync.json) (`mirrors[]`: iam, config, mcp, ai, bff, policy, secrets, audit, billing, mcp-notion).
 
 После правок контракта синхронизировать зеркало:
 
