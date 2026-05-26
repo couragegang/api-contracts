@@ -1,0 +1,331 @@
+openapi: 3.1.0
+info:
+  title: AI runtime — n8n orchestrator bridge
+  version: 0.1.0
+  description: |
+  Internal API between n8n and ai-runtime (phase 2).
+  Canonical paths under ai-runtime context `/v1/ai`.
+
+servers:
+  - url: http://localhost:8083/v1/ai
+    description: Local docker compose
+
+tags:
+  - name: internal
+    description: n8n ↔ ai-runtime only
+
+paths:
+  /internal/conversations/{conversationId}/messages:
+    get:
+      operationId: listConversationMessagesInternal
+      tags: [internal]
+      summary: Conversation history for orchestrator
+      security:
+        - AiInternalApiKey: []
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            $ref: '../common/schemas/ids.yaml#/Uuid'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 30
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Messages
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalMessageListResponse'
+        '401':
+          description: Unauthorized
+
+  /internal/llm/route:
+    post:
+      operationId: routeOrchestratorPlan
+      tags: [internal]
+      summary: DeepSeek router — pick tools or chat-only
+      security:
+        - AiInternalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalRouteRequest'
+      responses:
+        '200':
+          description: Plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrchestratorPlan'
+
+  /internal/hitl/format-approval:
+    post:
+      operationId: formatHitlApproval
+      tags: [internal]
+      summary: Human-readable HITL approval message
+      security:
+        - AiInternalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalHitlFormatRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HitlFormatResponse'
+
+  /internal/hitl/format-denied:
+    post:
+      operationId: formatHitlDenied
+      tags: [internal]
+      summary: Human-readable policy deny message
+      security:
+        - AiInternalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalHitlFormatRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HitlFormatResponse'
+
+  /internal/llm/complete:
+    post:
+      operationId: completeLlmInternal
+      tags: [internal]
+      summary: LLM completion for n8n (secrets stay in ai-runtime)
+      security:
+        - AiInternalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalLlmCompleteRequest'
+      responses:
+        '200':
+          description: LLM reply
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalLlmCompleteResponse'
+        '401':
+          description: Unauthorized
+
+  /internal/runs/{runId}/complete:
+    post:
+      operationId: completeOrchestratorRun
+      tags: [internal]
+      summary: n8n callback when run finishes
+      security:
+        - AiInternalApiKey: []
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            $ref: '../common/schemas/ids.yaml#/Uuid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunCompleteRequest'
+      responses:
+        '204':
+          description: Accepted
+        '401':
+          description: Unauthorized
+
+components:
+  securitySchemes:
+    AiInternalApiKey:
+      type: apiKey
+      in: header
+      name: X-Ai-Internal-Key
+
+  schemas:
+    InternalMessageListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/InternalMessageView'
+
+    InternalMessageView:
+      type: object
+      required: [id, role, content, createdAt]
+      properties:
+        id:
+          $ref: '../common/schemas/ids.yaml#/Uuid'
+        role:
+          type: string
+        content:
+          type: string
+        status:
+          type: string
+        pendingApprovalId:
+          $ref: '../common/schemas/ids.yaml#/Uuid'
+        toolName:
+          type: string
+        connectorKey:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    ChatTurnDto:
+      type: object
+      required: [role, content]
+      properties:
+        role:
+          type: string
+        content:
+          type: string
+
+    InternalLlmCompleteRequest:
+      type: object
+      required: [messages]
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatTurnDto'
+        mcpContext:
+          type: string
+        workspaceId:
+          type: string
+
+    InternalRouteRequest:
+      type: object
+      required: [message, messages, activeConnectorKeys]
+      properties:
+        message:
+          type: string
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatTurnDto'
+        activeConnectorKeys:
+          type: array
+          items:
+            type: string
+        knowledgeContext:
+          type: string
+
+    PlanStep:
+      type: object
+      required: [connectorKey, toolName]
+      properties:
+        connectorKey:
+          type: string
+        toolName:
+          type: string
+        arguments:
+          type: object
+          additionalProperties: true
+        label:
+          type: string
+
+    OrchestratorPlan:
+      type: object
+      required: [mode, steps]
+      properties:
+        mode:
+          type: string
+          enum: [chat, tool_chain]
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanStep'
+        reasoning:
+          type: string
+
+    InternalHitlFormatRequest:
+      type: object
+      required: [connectorKey, toolName, stepIndex, totalSteps]
+      properties:
+        connectorKey:
+          type: string
+        toolName:
+          type: string
+        arguments:
+          type: object
+          additionalProperties: true
+        stepIndex:
+          type: integer
+        totalSteps:
+          type: integer
+
+    HitlFormatResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+
+    InternalLlmCompleteResponse:
+      type: object
+      required: [reply, status]
+      properties:
+        reply:
+          type: string
+        status:
+          type: string
+
+    RunCompleteRequest:
+      type: object
+      required: [status, reply]
+      properties:
+        status:
+          type: string
+          examples: [completed, awaiting_approval, error, orchestrating]
+        reply:
+          type: string
+        pendingApprovalId:
+          $ref: '../common/schemas/ids.yaml#/Uuid'
+        toolName:
+          type: string
+        connectorKey:
+          type: string
+
+    OrchestratorStartRequest:
+      type: object
+      description: Payload POST from ai-runtime to n8n webhook (not an ai-runtime path)
+      required: [runId, conversationId, workspaceId, message]
+      properties:
+        runId:
+          $ref: '../common/schemas/ids.yaml#/Uuid'
+        conversationId:
+          $ref: '../common/schemas/ids.yaml#/Uuid'
+        orgId:
+          $ref: '../common/schemas/ids.yaml#/Uuid'
+        workspaceId:
+          $ref: '../common/schemas/ids.yaml#/Uuid'
+        userId:
+          $ref: '../common/schemas/ids.yaml#/Uuid'
+        message:
+          type: string
+        approvedPendingApprovalId:
+          $ref: '../common/schemas/ids.yaml#/Uuid'
+        resume:
+          type: boolean

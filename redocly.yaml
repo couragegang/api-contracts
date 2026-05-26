@@ -10,6 +10,8 @@ apis:
     root: mcp/openapi.yaml
   ai@v1:
     root: ai/openapi.yaml
+  ai-orchestrator@v1:
+    root: ai/orchestrator.yaml
   bff@v1:
     root: bff/openapi.yaml
   policy@v1:

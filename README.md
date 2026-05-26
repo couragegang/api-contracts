@@ -17,6 +17,7 @@
 | [`mcp/openapi.yaml`](mcp/openapi.yaml) | mcp-gateway | `/v1/mcp` | черновик (control plane) |
 | [`mcp-connectors/`](mcp-connectors/) | **mcp-notion**, … | `/v1/{connector}` | runtime invoke/health/discover ([ADR-002](../../cursor-context/docs/adr-002-mcp-connector-runtime-http.md)) |
 | [`ai/openapi.yaml`](ai/openapi.yaml) | ai-runtime | `/v1/ai` | черновик |
+| [`ai/orchestrator.yaml`](ai/orchestrator.yaml) | ai-runtime (n8n bridge) | `/v1/ai/internal/...` | фаза 2 |
 | [`bff/openapi.yaml`](bff/openapi.yaml) | bff-gateway | `/v1/bff` | черновик |
 | [`policy/openapi.yaml`](policy/openapi.yaml) | policy-service | `/v1/policy` | черновик |
 | [`audit/openapi.yaml`](audit/openapi.yaml) | audit-service | `/v1/audit` | черновик |
