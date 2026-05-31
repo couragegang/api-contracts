@@ -18,7 +18,7 @@
 | connectorKey | Сервис (compose) | Host port | `runtime_base_url` (docker network) | Репозиторий |
 |--------------|------------------|-----------|----------------------------------------|-------------|
 | `notion` | `mcp-notion` | **8091** | `http://mcp-notion:8091/v1/notion` | `couragegang/mcp-notion` |
-| *(резерв)* | `mcp-slack` | **8092** | `http://mcp-slack:8092/v1/slack` | `couragegang/mcp-slack` |
+| `trello` | `mcp-trello` | **8092** | `http://mcp-trello:8092/v1/trello` | `couragegang/mcp-trello` *(TBD)* |
 | *(резерв)* | — | **8093–8099** | — | следующие коннекторы |
 
 ## Правила выделения портов
