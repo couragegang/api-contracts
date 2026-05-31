@@ -1,0 +1,106 @@
+openapi: 3.1.0
+info:
+  title: mcp-trello connector API
+  version: 0.1.0
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
+  description: |
+    Trello MCP connector runtime (`couragegang/mcp-trello`).
+    Shared internal paths — `mcp-connectors/runtime/openapi.yaml`;
+    Trello-specific — `/internal/discover`.
+
+servers:
+  - url: http://localhost:8092/v1/trello
+    description: Local docker compose (host)
+  - url: http://mcp-trello:8092/v1/trello
+    description: Docker network (mcp-gateway → connector)
+
+tags:
+  - name: internal
+    description: Service-to-service only
+
+security:
+  - InternalApiKey: []
+
+paths:
+  /internal/tools/invoke:
+    $ref: '../../runtime/openapi.yaml#/paths/~1internal~1tools~1invoke'
+  /internal/health:
+    $ref: '../../runtime/openapi.yaml#/paths/~1internal~1health'
+  /internal/normalize-config:
+    $ref: '../../runtime/openapi.yaml#/paths/~1internal~1normalize-config'
+
+  /internal/discover:
+    post:
+      operationId: discoverResources
+      tags: [internal]
+      summary: List Trello boards for installation setup
+      security:
+        - InternalApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrelloDiscoverRequest'
+      responses:
+        '200':
+          description: Discoverable resources
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrelloDiscoverResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '../../../common/schemas/error.yaml#/ErrorBody'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../../../common/schemas/error.yaml#/ErrorBody'
+
+components:
+  securitySchemes:
+    InternalApiKey:
+      $ref: '../../runtime/openapi.yaml#/components/securitySchemes/InternalApiKey'
+
+  schemas:
+    TrelloDiscoverRequest:
+      type: object
+      required: [apiKey, token]
+      properties:
+        apiKey:
+          type: string
+          description: Trello API key (setup flow only)
+        token:
+          type: string
+          description: Trello user token (setup flow only)
+
+    TrelloResourceItem:
+      type: object
+      required: [id, title, kind]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        url:
+          type: string
+          format: uri
+        kind:
+          type: string
+          examples: [board]
+
+    TrelloDiscoverResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrelloResourceItem'

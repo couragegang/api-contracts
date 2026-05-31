@@ -26,6 +26,8 @@ apis:
     root: mcp-connectors/runtime/openapi.yaml
   mcp-notion@v1:
     root: mcp-connectors/connectors/notion/openapi.yaml
+  mcp-trello@v1:
+    root: mcp-connectors/connectors/trello/openapi.yaml
 
 rules:
   no-server-example.com: off

@@ -69,6 +69,13 @@
       "serviceRepo": "couragegang/mcp-notion",
       "serviceDir": "mcp-notion",
       "serviceCopy": "openapi/openapi.yaml"
+    },
+    {
+      "id": "mcp-trello",
+      "canonical": "mcp-connectors/connectors/trello/openapi.yaml",
+      "serviceRepo": "couragegang/mcp-trello",
+      "serviceDir": "mcp-trello",
+      "serviceCopy": "openapi/openapi.yaml"
     }
   ],
   "canonicalOnly": [
